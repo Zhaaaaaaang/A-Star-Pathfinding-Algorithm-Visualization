@@ -144,11 +144,15 @@ def G(current, start):
     dy = abs(ynodeC - ynodeS)
     return 1 * (dx + dy)
 
-
-# F score is simply G score + H score
 def F(current, start, end):
     Fscore = H(current, end) + G(current, start)
     return Fscore
+
+def reconstructPath(parent, current, draw):
+    while current in parent:
+        current = parent[current]
+        current.colorFinalPathingNode()
+        draw()
 
 
 # A* Algorithm full
@@ -173,6 +177,8 @@ def algorithm(draw, grid, start, end):
         openSetHash.remove(current)
 
         if current == end:
+            reconstructPath(parent, end, draw)
+            end.colorEndNode()
             return True
 
         for neighbour in current.neighbours:
@@ -205,7 +211,6 @@ def main(gameDisp, dispWidth):
     end = None
 
     run = True
-    started = False
 
     while run:
         fullDraw(gameDisplay, grid, rowsInGrid, displayWidth)
@@ -242,11 +247,18 @@ def main(gameDisp, dispWidth):
                     end = None
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not started:
+                if event.key == pygame.K_SPACE and start and end:
                     for row in grid:
                         for node in row:
                             node.updateNeighbour(grid)
                     algorithm(lambda: fullDraw(gameDisp, grid, rowsInGrid, dispWidth), grid, start, end)
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:
+                    start = None
+                    end = None
+                    grid = nodeGrid(rowsInGrid, displayWidth)
+
 
     pygame.quit()
 
